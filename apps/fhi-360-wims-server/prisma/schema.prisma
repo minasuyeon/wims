@@ -1,0 +1,244 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model InventoryItem {
+  id          String     @id @default(cuid())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  name        String?
+  quantity    Int?
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  supplier    Supplier?  @relation(fields: [supplierId], references: [id])
+  supplierId  String?
+  vendor      Vendor?    @relation(fields: [vendorId], references: [id])
+  vendorId    String?
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+  warehouseId String?
+}
+
+model Warehouse {
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  name           String?
+  location       String?
+  capacity       Int?
+  inventoryItems InventoryItem[]
+  stateStore     StateStore?     @relation(fields: [stateStoreId], references: [id])
+  stateStoreId   String?
+}
+
+model Form {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  typeField  String?
+  isActive   Boolean?
+  createdBy  String?
+  assignedTo String?
+}
+
+model Supplier {
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  name           String?
+  contactInfo    Json?
+  stateId        String?
+  inventoryItems InventoryItem[]
+}
+
+model Category {
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  name           String?
+  inventoryItems InventoryItem[]
+}
+
+model Vendor {
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  name           String?
+  contactInfo    Json?
+  inventoryItems InventoryItem[]
+}
+
+model Role {
+  id               String            @id @default(cuid())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  name             String?
+  privileges       Json?
+  users            User[]
+  applicationUsers ApplicationUser[]
+}
+
+model StateStore {
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  location   String?
+  stateId    String?
+  managerId  String?
+  warehouses Warehouse[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  firstName      String?
+  lastName       String?
+  username       String       @unique
+  email          String?      @unique
+  password       String
+  roles          Json
+  department     String?
+  officeLocation String?
+  role           Role?        @relation(fields: [roleId], references: [id])
+  roleId         String?
+  auditTrails    AuditTrail[]
+}
+
+model Location {
+  id         String                 @id @default(cuid())
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  address    String?
+  name       String?
+  typeField  EnumLocationTypeField?
+  deliveries Delivery[]
+}
+
+model Prediction {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  predictionDate DateTime?
+  predictedNeed  Int?
+  product        Product?  @relation(fields: [productId], references: [id])
+  productId      String?
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id               String             @id @default(cuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  name             String?
+  description      String?
+  status           EnumProductStatus?
+  registrationDate DateTime?
+  deliveries       Delivery[]
+  predictions      Prediction[]
+  customAlerts     CustomAlert[]
+}
+
+model CustomAlert {
+  id        String                    @id @default(cuid())
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime                  @updatedAt
+  alertType EnumCustomAlertAlertType?
+  active    Boolean?
+  threshold Int?
+  product   Product?                  @relation(fields: [productId], references: [id])
+  productId String?
+}
+
+model AuditTrail {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  action    String?
+  timestamp DateTime?
+  details   String?
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Delivery {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deliveredAt DateTime?
+  details     String?
+  location    Location? @relation(fields: [locationId], references: [id])
+  locationId  String?
+  product     Product?  @relation(fields: [productId], references: [id])
+  productId   String?
+}
+
+model UserRole {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  privileges Json?
+  name       String?
+}
+
+model InventoryReport {
+  id              String                         @id @default(cuid())
+  createdAt       DateTime                       @default(now())
+  updatedAt       DateTime                       @updatedAt
+  reportType      EnumInventoryReportReportType?
+  generatedAt     DateTime?
+  details         String?
+  emailPreference Boolean?
+  printPreference Boolean?
+}
+
+model VendorSupplier {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String?
+  address     String?
+  contactInfo Json?
+}
+
+model ApplicationUser {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  password  String?
+  email     String?
+  username  String?
+  role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    String?
+}
+
+enum EnumLocationTypeField {
+  Option1
+}
+
+enum EnumProductStatus {
+  Option1
+}
+
+enum EnumCustomAlertAlertType {
+  Option1
+}
+
+enum EnumInventoryReportReportType {
+  Option1
+}
