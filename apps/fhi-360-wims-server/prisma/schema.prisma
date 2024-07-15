@@ -1,0 +1,106 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Supplier {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  name           String?
+  contactDetails String?
+  contractTerms  String?
+  products       Product[]
+}
+
+model StateStore {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  name       String?
+  location   String?
+  stockLevel Int?
+}
+
+model Delivery {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  origin      String?
+  destination String?
+  date        DateTime?
+  product     Product?  @relation(fields: [productId], references: [id])
+  productId   String?
+}
+
+model Product {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  name         String?
+  category     String?
+  stockLevel   Int?
+  reorderLevel Int?
+  supplier     Supplier?  @relation(fields: [supplierId], references: [id])
+  supplierId   String?
+  deliveries   Delivery[]
+}
+
+model Report {
+  id         String                @id @default(cuid())
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  reportType EnumReportReportType?
+  period     String?
+  data       Json?
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  firstName String?
+  lastName  String?
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  roles     Json
+}
+
+model EquipmentReturnForm {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EquipmentCollectionForm {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AssetExitFormForVendor {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductRegistrationForm {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EquipmentLoanForm {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EnumReportReportType {
+  Option1
+}
